@@ -7,3 +7,6 @@ __pycache__/
 
 # Personal portfolio data — stays local only
 data/
+
+# Icon (binary, lives next to the exe)
+*.ico

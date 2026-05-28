@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import uuid
 from datetime import datetime
@@ -6,9 +7,9 @@ from pathlib import Path
 
 
 def _app_dir() -> Path:
-    # When frozen by PyInstaller sys.executable is the .exe itself
     if getattr(sys, "frozen", False):
-        return Path(sys.executable).parent
+        # Installed exe — write to APPDATA so Program Files restriction doesn't block us
+        return Path(os.environ.get("APPDATA", Path.home())) / "CS2 Case Tracker"
     return Path(__file__).parent.parent
 
 
@@ -20,7 +21,7 @@ _SALES_FILE = _DATA_DIR / "sales.json"
 
 
 def _ensure_data_dir():
-    _DATA_DIR.mkdir(exist_ok=True)
+    _DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def load_portfolio() -> dict:

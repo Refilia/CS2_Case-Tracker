@@ -9,21 +9,27 @@ import customtkinter as ctk
 from src import portfolio, steam_api
 from src.chart import PriceChart
 
-ctk.set_appearance_mode("dark")
+ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
-# Fixed pixel widths — header and every data row use the same values so columns line up
+# ── Pastel pink palette ────────────────────────────────────────────────────
 _COL_WIDTHS  = [220, 105, 90, 105, 115, 105, 85]
 _COL_HEADERS = ["Case Name", "Batches", "Total Qty", "Avg Buy", "Market Price", "Net Sell", "P/L"]
-_ROW_EVEN = "#1c1c28"
-_ROW_ODD = "#22222f"
-_ROW_SEL = "#1a2f45"
-_HDR_BG = "#111120"
-_GREEN = "#4caf50"
-_RED = "#ef5350"
-_BLUE = "#4fc3f7"
-_NET_GREEN = "#81c784"
-_DIM = "#888888"
+
+_BG          = "#FFF8FA"   # main window background
+_CARD_BG     = "#FCE4EC"   # summary card / header strip
+_ROW_EVEN    = "#FFFFFF"
+_ROW_ODD     = "#FFF0F5"   # lavender blush
+_ROW_SEL     = "#FFD6E7"   # selected row
+_HDR_BG      = "#F8BBD0"   # column header bar
+_PINK        = "#F06292"   # primary accent (buttons, highlights)
+_PINK_HOVER  = "#EC407A"   # button hover
+_GREEN       = "#388E3C"   # profit
+_RED         = "#D32F2F"   # loss
+_BLUE        = "#E91E63"   # market price (deep pink)
+_NET_GREEN   = "#43A047"   # net sell
+_DIM         = "#AAAAAA"   # secondary text
+_TEXT        = "#2D2D2D"   # primary text
 
 # Resolve icon path once — next to the exe when frozen, project root otherwise
 _ICO = (Path(sys.executable).parent if getattr(sys, "frozen", False)
@@ -33,12 +39,13 @@ _ICO = (Path(sys.executable).parent if getattr(sys, "frozen", False)
 def _apply_icon(window):
     """Set the CS2 tracker icon on any Tk/CTk window.
 
-    CTkToplevel calls wm_iconbitmap('') at ~200 ms to clear its own icon,
-    so we must schedule our call after that window has passed.
+    CTkToplevel resets the icon via wm_iconbitmap('') at ~200 ms.
+    We fire twice (350 ms and 600 ms) to survive any late resets.
     """
     if _ICO.exists():
         ico = str(_ICO)
-        window.after(300, lambda: window.iconbitmap(ico))
+        window.after(350, lambda: window.iconbitmap(ico))
+        window.after(600, lambda: window.iconbitmap(ico))
 
 
 class _AutocompleteCombo(ctk.CTkFrame):
@@ -117,7 +124,7 @@ class _AutocompleteCombo(ctk.CTkFrame):
             btn = ctk.CTkButton(
                 self._list_frame, text=m, anchor="w", height=28,
                 fg_color="transparent", hover_color="#2a2a4e",
-                text_color="#dddddd", font=ctk.CTkFont(size=11),
+                text_color="#dddddd", font=("Ink Free", 13, "bold"),
                 command=lambda v=m: self._pick(v),
             )
             btn.pack(fill="x", padx=2, pady=1)
@@ -159,7 +166,7 @@ class _AddBatchDialog(ctk.CTkToplevel):
         self.grab_set()
 
     def _build(self):
-        ctk.CTkLabel(self, text="Add a new batch of cases", font=ctk.CTkFont(size=15, weight="bold")).pack(pady=(18, 14))
+        ctk.CTkLabel(self, text="Add a new batch of cases", font=("Ink Free", 17, "bold")).pack(pady=(18, 14))
 
         ctk.CTkLabel(self, text="Case Name", anchor="w").pack(fill="x", padx=28)
         self.case_combo = _AutocompleteCombo(self, values=steam_api.CS2_CASES, width=360)
@@ -244,16 +251,16 @@ class _SellDialog(ctk.CTkToplevel):
         if not owned:
             ctk.CTkLabel(
                 self, text="No cases in portfolio to sell.",
-                text_color=_DIM, font=ctk.CTkFont(size=13),
+                text_color=_DIM, font=("Ink Free", 15, "bold"),
             ).pack(pady=60)
             return
 
-        ctk.CTkLabel(self, text="Record a sale (price = after Steam fees)", font=ctk.CTkFont(size=15, weight="bold")).pack(pady=(18, 14))
+        ctk.CTkLabel(self, text="Record a sale (price = after Steam fees)", font=("Ink Free", 17, "bold")).pack(pady=(18, 14))
 
         ctk.CTkLabel(self, text="Case Name", anchor="w").pack(fill="x", padx=28)
         self._avail_lbl = ctk.CTkLabel(
             self, text=f"Available in portfolio: {self._owned_qty(owned[0])}",
-            font=ctk.CTkFont(size=11), text_color=_DIM, anchor="w",
+            font=("Ink Free", 13, "bold"), text_color=_DIM, anchor="w",
         )
         self.case_combo = _AutocompleteCombo(
             self, values=owned, width=360,
@@ -344,16 +351,18 @@ class _SalesHistoryWindow(ctk.CTkToplevel):
         self.focus_force()
 
     def _build(self):
+        self.configure(fg_color=_BG)
+
         # Header bar
         hdr = ctk.CTkFrame(self, fg_color="transparent")
         hdr.pack(fill="x", padx=18, pady=(14, 0))
-        ctk.CTkLabel(hdr, text="Sales History", font=ctk.CTkFont(size=18, weight="bold")).pack(side="left")
+        ctk.CTkLabel(hdr, text="Sales History", font=("Ink Free", 24, "bold"), text_color=_PINK).pack(side="left")
 
-        # Summary bar — same dark-card style as the main window
-        summary_frame = ctk.CTkFrame(self, fg_color="#12121e", corner_radius=8)
+        # Summary bar
+        summary_frame = ctk.CTkFrame(self, fg_color=_CARD_BG, corner_radius=8)
         summary_frame.pack(fill="x", padx=18, pady=(8, 0))
         self._summary_lbl = ctk.CTkLabel(
-            summary_frame, text="", font=ctk.CTkFont(size=12), text_color="#aaaaaa",
+            summary_frame, text="", font=("Ink Free", 14, "bold"), text_color=_DIM,
         )
         self._summary_lbl.pack(padx=16, pady=10)
 
@@ -364,12 +373,12 @@ class _SalesHistoryWindow(ctk.CTkToplevel):
         for i, (h, cw) in enumerate(zip(self._HEADERS, self._WIDTHS)):
             ctk.CTkLabel(
                 col_hdr, text=h, width=cw,
-                font=ctk.CTkFont(size=11, weight="bold"),
-                text_color="#bbbbbb", anchor="w",
+                font=("Ink Free", 13, "bold"),
+                text_color=_TEXT, anchor="w",
             ).pack(side="left", padx=(10 if i == 0 else 0, 0))
 
         # Scrollable table
-        self._table = ctk.CTkScrollableFrame(self, fg_color="#0e0e1a", corner_radius=0)
+        self._table = ctk.CTkScrollableFrame(self, fg_color=_ROW_EVEN, corner_radius=0)
         self._table.pack(fill="both", expand=True, padx=18, pady=(0, 14))
 
         self._render()
@@ -386,7 +395,7 @@ class _SalesHistoryWindow(ctk.CTkToplevel):
             ctk.CTkLabel(
                 self._table,
                 text="No sales recorded yet. Use 'Record Sale' in the main window.",
-                text_color=_DIM, font=ctk.CTkFont(size=12),
+                text_color=_DIM, font=("Ink Free", 14, "bold"),
             ).pack(pady=30)
             self._summary_lbl.configure(text="No sales yet.")
             return
@@ -421,8 +430,8 @@ class _SalesHistoryWindow(ctk.CTkToplevel):
                 f"{sign}{pl_case:.2f} €",
                 f"{sign}{pl_total:.2f} €",
             ]
-            colors = [_DIM, "#ffffff", _DIM, _NET_GREEN, _NET_GREEN, _DIM, pl_color, pl_color]
-            fonts = [ctk.CTkFont(size=11)] * 8
+            colors = [_DIM, _TEXT, _DIM, _NET_GREEN, _NET_GREEN, _DIM, pl_color, pl_color]
+            fonts = [("Ink Free", 13, "bold")] * 8
 
             for j, (val, col, font, cw) in enumerate(zip(values, colors, fonts, self._WIDTHS)):
                 ctk.CTkLabel(
@@ -430,8 +439,8 @@ class _SalesHistoryWindow(ctk.CTkToplevel):
                 ).pack(side="left", padx=(10 if j == 0 else 0, 0), pady=8)
 
             ctk.CTkButton(
-                row, text="✕", width=32, height=26, fg_color="#7f1d1d",
-                hover_color="#991b1b",
+                row, text="✕", width=32, height=26,
+                fg_color=_PINK, hover_color=_PINK_HOVER, text_color="#ffffff",
                 command=lambda sid=s["id"]: self._remove(sid),
             ).pack(side="right", padx=8, pady=5)
 
@@ -471,12 +480,13 @@ class _BatchListDialog(ctk.CTkToplevel):
         self.grab_set()
 
     def _build(self):
+        self.configure(fg_color=_BG)
         ctk.CTkLabel(
             self, text=self._case_name,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            font=("Ink Free", 16, "bold"), text_color=_PINK,
         ).pack(pady=(16, 6))
 
-        self._scroll = ctk.CTkScrollableFrame(self, fg_color="#111111")
+        self._scroll = ctk.CTkScrollableFrame(self, fg_color=_ROW_ODD)
         self._scroll.pack(fill="both", expand=True, padx=16, pady=(0, 12))
         self._render()
 
@@ -490,18 +500,18 @@ class _BatchListDialog(ctk.CTkToplevel):
             return
 
         for b in batches:
-            row = ctk.CTkFrame(self._scroll, fg_color="#1c1c2e", corner_radius=6)
+            row = ctk.CTkFrame(self._scroll, fg_color=_CARD_BG, corner_radius=6)
             row.pack(fill="x", pady=3)
 
             info = (
                 f"{b['quantity']}×  |  bought: {b['purchase_price_eur']:.2f} €  |  {b['purchase_date']}"
             )
-            ctk.CTkLabel(row, text=info, font=ctk.CTkFont(size=11), anchor="w").pack(
+            ctk.CTkLabel(row, text=info, font=("Ink Free", 13, "bold"), anchor="w", text_color=_TEXT).pack(
                 side="left", padx=12, pady=8
             )
             ctk.CTkButton(
-                row, text="Remove", width=72, height=28, fg_color="#7f1d1d",
-                hover_color="#991b1b",
+                row, text="Remove", width=72, height=28,
+                fg_color=_PINK, hover_color=_PINK_HOVER, text_color="#ffffff",
                 command=lambda bid=b["id"]: self._remove(bid),
             ).pack(side="right", padx=8, pady=6)
 
@@ -531,51 +541,54 @@ class App(ctk.CTk):
     # ------------------------------------------------------------------ build
 
     def _build_ui(self):
+        self.configure(fg_color=_BG)
+
         # ── Header ──────────────────────────────────────────────────────────
         hdr = ctk.CTkFrame(self, fg_color="transparent")
         hdr.pack(fill="x", padx=18, pady=(14, 0))
 
         ctk.CTkLabel(
             hdr, text="CS2 Case Tracker",
-            font=ctk.CTkFont(size=21, weight="bold"),
+            font=("Ink Free", 26, "bold"),
+            text_color=_PINK,
         ).pack(side="left")
+
+        _btn = dict(fg_color=_PINK, hover_color=_PINK_HOVER, text_color="#ffffff")
 
         self._refresh_btn = ctk.CTkButton(
             hdr, text="↻  Refresh Prices", width=148,
-            command=self._start_refresh,
+            command=self._start_refresh, **_btn,
         )
         self._refresh_btn.pack(side="right")
 
         ctk.CTkButton(
             hdr, text="+ Add Batch", width=120,
-            command=self._open_add_dialog,
+            command=self._open_add_dialog, **_btn,
         ).pack(side="right", padx=(0, 8))
 
         ctk.CTkButton(
-            hdr, text="Record Sale", width=120, fg_color="#1a4731",
-            hover_color="#166534",
-            command=self._open_sell_dialog,
+            hdr, text="Record Sale", width=120,
+            command=self._open_sell_dialog, **_btn,
         ).pack(side="right", padx=(0, 8))
 
         ctk.CTkButton(
-            hdr, text="Sales History", width=120, fg_color="#1e3a5f",
-            hover_color="#1e40af",
-            command=self._open_sales_history,
+            hdr, text="Sales History", width=120,
+            command=self._open_sales_history, **_btn,
         ).pack(side="right", padx=(0, 8))
 
         self._status_lbl = ctk.CTkLabel(
-            hdr, text="", font=ctk.CTkFont(size=11), text_color=_DIM,
+            hdr, text="", font=("Ink Free", 13, "bold"), text_color=_DIM,
         )
         self._status_lbl.pack(side="right", padx=(0, 14))
 
         # ── Summary bar ─────────────────────────────────────────────────────
-        self._summary_frame = ctk.CTkFrame(self, fg_color="#12121e", corner_radius=8)
+        self._summary_frame = ctk.CTkFrame(self, fg_color=_CARD_BG, corner_radius=8)
         self._summary_frame.pack(fill="x", padx=18, pady=(10, 0))
 
         self._summary_lbl = ctk.CTkLabel(
             self._summary_frame,
             text="Add batches and refresh prices to see your portfolio summary.",
-            font=ctk.CTkFont(size=12), text_color=_DIM,
+            font=("Ink Free", 14, "bold"), text_color=_DIM,
         )
         self._summary_lbl.pack(padx=16, pady=10)
 
@@ -586,25 +599,25 @@ class App(ctk.CTk):
 
         ctk.CTkLabel(
             col_hdr, text="Actions", width=80,
-            font=ctk.CTkFont(size=11, weight="bold"),
-            text_color="#bbbbbb", anchor="w",
+            font=("Ink Free", 13, "bold"),
+            text_color=_TEXT, anchor="w",
         ).pack(side="right", padx=(0, 10))
 
         for i, (h, cw) in enumerate(zip(_COL_HEADERS, _COL_WIDTHS)):
             ctk.CTkLabel(
                 col_hdr, text=h, width=cw,
-                font=ctk.CTkFont(size=11, weight="bold"),
-                text_color="#bbbbbb", anchor="w",
+                font=("Ink Free", 13, "bold"),
+                text_color=_TEXT, anchor="w",
             ).pack(side="left", padx=(10 if i == 0 else 0, 0))
 
         # ── Scrollable table ────────────────────────────────────────────────
         self._table = ctk.CTkScrollableFrame(
-            self, fg_color="#0e0e1a", corner_radius=0, height=210,
+            self, fg_color=_ROW_EVEN, corner_radius=0, height=210,
         )
         self._table.pack(fill="x", padx=18)
 
         # ── Divider ─────────────────────────────────────────────────────────
-        ctk.CTkFrame(self, height=2, fg_color="#222235", corner_radius=0).pack(
+        ctk.CTkFrame(self, height=2, fg_color=_HDR_BG, corner_radius=0).pack(
             fill="x", padx=18, pady=(6, 0)
         )
 
@@ -613,7 +626,8 @@ class App(ctk.CTk):
         chart_hdr.pack(fill="x", padx=18, pady=(8, 0))
         ctk.CTkLabel(
             chart_hdr, text="Price History",
-            font=ctk.CTkFont(size=13, weight="bold"),
+            font=("Ink Free", 15, "bold"),
+            text_color=_TEXT,
         ).pack(side="left")
 
         self._chart = PriceChart(self, corner_radius=8)
@@ -640,7 +654,7 @@ class App(ctk.CTk):
             ctk.CTkLabel(
                 self._table,
                 text="No cases yet — click '+ Add Batch' to start tracking.",
-                text_color=_DIM, font=ctk.CTkFont(size=12),
+                text_color=_DIM, font=("Ink Free", 14, "bold"),
             ).pack(pady=24)
             self._update_summary([])
             return
@@ -674,14 +688,14 @@ class App(ctk.CTk):
                 case_name, batch_label, str(total_qty),
                 f"{avg_buy:.2f} €", cur_text, net_text, pl_text,
             ]
-            colors = ["#ffffff", _DIM, _DIM, _DIM, _BLUE, _NET_GREEN, pl_color]
-            fonts = [ctk.CTkFont(size=11, weight="bold")] + [ctk.CTkFont(size=11)] * 6
+            colors = [_TEXT, _DIM, _DIM, _DIM, _BLUE, _NET_GREEN, pl_color]
+            fonts = [("Ink Free", 13, "bold")] + [("Ink Free", 13, "bold")] * 6
 
             # Pack manage button first so it anchors to the far right
             ctk.CTkButton(
                 row, text="Manage", width=72, height=26,
-                fg_color="#2a2a3e", hover_color="#3d3d6b",
-                font=ctk.CTkFont(size=11),
+                fg_color=_PINK, hover_color=_PINK_HOVER,
+                text_color="#ffffff", font=("Ink Free", 13, "bold"),
                 command=lambda cn=case_name: self._open_batch_list(cn),
             ).pack(side="right", padx=(0, 10))
 

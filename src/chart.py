@@ -5,14 +5,14 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import matplotlib.dates as mdates
 
-_BG = "#1a1a1a"
-_AX_BG = "#141414"
-_GRID_COLOR = "#2a2a2a"
-_TICK_COLOR = "#888888"
-_SPINE_COLOR = "#333333"
-_PRICE_LINE = "#4fc3f7"
-_NET_LINE = "#81c784"
-_BATCH_COLORS = ["#ff8a65", "#ce93d8", "#fff176", "#80cbc4", "#ef9a9a", "#ffcc02"]
+_BG         = "#FFF8FA"   # chart frame background
+_AX_BG      = "#FFFFFF"   # axes area
+_GRID_COLOR = "#FADADD"   # soft pink grid lines
+_TICK_COLOR = "#888888"   # axis tick labels
+_SPINE_COLOR = "#F8BBD0"  # axes border
+_PRICE_LINE = "#E91E63"   # deep pink — market price
+_NET_LINE   = "#43A047"   # green — net after fees
+_BATCH_COLORS = ["#F06292", "#AB47BC", "#42A5F5", "#26A69A", "#FF7043", "#FFA726"]
 
 
 class PriceChart(ctk.CTkFrame):
@@ -33,17 +33,17 @@ class PriceChart(ctk.CTkFrame):
         ax = self.ax
         ax.set_facecolor(_AX_BG)
         ax.tick_params(colors=_TICK_COLOR, labelsize=8)
-        ax.grid(True, color=_GRID_COLOR, linewidth=0.5, linestyle="--")
+        ax.grid(True, color=_GRID_COLOR, linewidth=0.6, linestyle="--")
         for spine in ax.spines.values():
             spine.set_edgecolor(_SPINE_COLOR)
-        ax.title.set_color("#dddddd")
+        ax.title.set_color("#2D2D2D")
         ax.xaxis.label.set_color(_TICK_COLOR)
         ax.yaxis.label.set_color(_TICK_COLOR)
 
     def clear_chart(self):
         self.ax.clear()
         self._style_ax()
-        self.ax.set_title("Select a case row to view its price history", color="#555555", fontsize=10)
+        self.ax.set_title("Select a case row to view its price history", color="#BBBBBB", fontsize=10)
         self.canvas.draw()
 
     def update_chart(self, case_name: str, price_history: list, batches: list):
@@ -53,7 +53,7 @@ class PriceChart(ctk.CTkFrame):
         if not price_history:
             self.ax.set_title(
                 f"{case_name}  —  no price history yet, click ↻ Refresh",
-                color="#888888", fontsize=10,
+                color="#AAAAAA", fontsize=10,
             )
             self.canvas.draw()
             return
@@ -82,7 +82,7 @@ class PriceChart(ctk.CTkFrame):
             label = f"Buy {batch['quantity']}× @ {buy:.3f} € ({batch['purchase_date']})"
             self.ax.axhline(y=buy, color=color, linestyle=":", linewidth=1.5, label=label, alpha=0.85)
 
-        self.ax.set_title(case_name, color="#dddddd", fontsize=11, pad=6)
+        self.ax.set_title(case_name, color="#2D2D2D", fontsize=11, pad=6)
         self.ax.set_ylabel("Price (€)", color=_TICK_COLOR, fontsize=9)
 
         if len(timestamps) > 1:
@@ -97,9 +97,9 @@ class PriceChart(ctk.CTkFrame):
         self.ax.tick_params(axis="x", rotation=25, labelsize=7)
         self.ax.tick_params(axis="y", labelsize=8)
 
-        legend = self.ax.legend(
-            fontsize=7.5, facecolor="#1e1e1e", edgecolor="#333333",
-            labelcolor="#cccccc", loc="upper left",
+        self.ax.legend(
+            fontsize=7.5, facecolor="#FFF0F5", edgecolor="#F8BBD0",
+            labelcolor="#2D2D2D", loc="upper left",
         )
 
         self.canvas.draw()
