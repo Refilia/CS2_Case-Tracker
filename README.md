@@ -18,14 +18,14 @@ A desktop application to track your CS2 case inventory on the Steam Market. Moni
 
 ## Installation
 
-### Option A — Run the .exe (Windows, no Python required)
+### Option A — Installer (Windows, recommended)
 
-1. Go to the [Releases](../../releases) page and download `CS2 Case Tracker.exe`
-2. Place the `.exe` and the `CS2_tracker.ico` file in the same folder
-3. Double-click `CS2 Case Tracker.exe` to launch
+1. Go to the [Releases](../../releases) page and download `CS2_Case_Tracker_Setup.exe`
+2. Run the installer and follow the wizard
+3. Launch **CS2 Case Tracker** from the Desktop shortcut or Start Menu
 
-> **Note:** On first launch the app takes 10–15 seconds to start while it unpacks itself. Subsequent launches are faster.  
-> A `data\` folder will be created automatically next to the exe — this is where your portfolio is stored. Keep it alongside the exe.
+> The installer handles everything automatically — no manual file placement needed.  
+> Your portfolio data is stored in `%APPDATA%\CS2 Case Tracker\data\` and is preserved if you reinstall or update.
 
 ---
 
