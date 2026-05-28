@@ -1,3 +1,7 @@
+> ⚠️ **AI-Generated Project** — This project was fully designed and built with the assistance of [Claude](https://claude.ai) (Anthropic AI). The code, structure, and documentation were created through an AI-assisted development process.
+
+---
+
 # CS2 Case Tracker
 
 A desktop application to track your CS2 case inventory on the Steam Market. Monitor current prices, record purchases and sales, and view price history charts — all with Steam fees automatically accounted for.
