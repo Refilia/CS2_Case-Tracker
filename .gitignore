@@ -1,0 +1,9 @@
+# Build artefacts
+build/
+dist/
+*.spec
+__pycache__/
+*.pyc
+
+# Personal portfolio data — stays local only
+data/
